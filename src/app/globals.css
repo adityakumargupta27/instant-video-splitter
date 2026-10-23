@@ -1,0 +1,176 @@
+/* Apple HIG-compliant design system for Instant Video Splitter
+ * color.md: semantic colors, 4.5:1 contrast min for text ≤17pt
+ * typography.md: SF Pro / system fonts, min 11pt mobile
+ * dark-mode.md: base + elevated surface model, softened whites
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base ─────────────────────────────────────────────────────── */
+html {
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  /* iOS systemBackground (dark) — HIG: base surface */
+  background-color: #000000;
+  color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+               'Inter', system-ui, sans-serif;
+  font-size: 17px; /* HIG default mobile body size */
+  line-height: 1.47059; /* SF Pro body line-height ratio */
+}
+
+* { box-sizing: border-box; }
+
+/* ─── Scrollbar (HIG: Craft — care about every detail) ─────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #48484A; border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: #636366; }
+
+/* ─── Apple-style SF Pro-ish tracking ───────────────────────────── */
+.text-display {
+  letter-spacing: -0.022em; /* Display optical size tracking */
+  font-weight: 700;
+}
+.text-title {
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+.text-body { letter-spacing: -0.004em; }
+.text-caption { letter-spacing: 0; }
+.text-footnote { letter-spacing: 0.006em; }
+
+/* ─── Progress bar shimmer (HIG: Motion — purposeful, brief) ────── */
+@keyframes progress-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.progress-active {
+  background: linear-gradient(
+    90deg,
+    #0A84FF 0%,
+    #5E5CE6 40%,
+    #0A84FF 60%,
+    #30D158 100%
+  );
+  background-size: 200% auto;
+  animation: progress-shimmer 2.4s linear infinite;
+}
+
+/* ─── Crazy High-End Background Effects ─────────────────────────── */
+.bg-cosmic {
+  background-color: #030307;
+  background-image: 
+    radial-gradient(at 50% 0%, rgba(94, 92, 230, 0.18) 0px, transparent 65%),
+    radial-gradient(at 10% 20%, rgba(10, 132, 255, 0.12) 0px, transparent 50%),
+    radial-gradient(at 90% 30%, rgba(191, 90, 242, 0.13) 0px, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(48, 209, 88, 0.08) 0px, transparent 60%);
+}
+
+/* Subtle futuristic tech dot grid */
+.tech-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse at center 20%, black 40%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse at center 20%, black 40%, transparent 85%);
+}
+
+/* Organic drifting aurora orbs */
+@keyframes float-orb-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(60px, -40px) scale(1.15);
+  }
+  66% {
+    transform: translate(-40px, 30px) scale(0.92);
+  }
+}
+
+@keyframes float-orb-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(-50px, 50px) scale(1.1);
+  }
+  66% {
+    transform: translate(45px, -35px) scale(0.9);
+  }
+}
+
+@keyframes float-orb-3 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(0.95);
+  }
+  50% {
+    transform: translate(30px, 45px) scale(1.15);
+  }
+}
+
+.animate-orb-1 {
+  animation: float-orb-1 16s ease-in-out infinite;
+}
+
+.animate-orb-2 {
+  animation: float-orb-2 20s ease-in-out infinite;
+}
+
+.animate-orb-3 {
+  animation: float-orb-3 18s ease-in-out infinite;
+}
+
+/* High-tech glow border effect */
+.glow-card {
+  position: relative;
+  background: rgba(22, 22, 26, 0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 4px 24px -1px rgba(0, 0, 0, 0.6),
+    0 0 20px -2px rgba(10, 132, 255, 0.08);
+}
+
+.glow-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 
+    0 8px 32px -1px rgba(0, 0, 0, 0.7),
+    0 0 30px -2px rgba(94, 92, 230, 0.15);
+}
+
+/* ─── Glass material (HIG liquid-glass: functional layer only) ───── */
+.glass {
+  background: rgba(10, 10, 14, 0.65);
+  backdrop-filter: saturate(190%) blur(24px);
+  -webkit-backdrop-filter: saturate(190%) blur(24px);
+}
+
+/* ─── Fade-up entrance (HIG: Motion — purposeful) ───────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);     }
+}
+.animate-fade-up { animation: fadeUp 0.28s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+/* ─── Scale-in (for cards appearing) ────────────────────────────── */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+.animate-scale-in { animation: scaleIn 0.22s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+/* ─── Focus ring (HIG Accessibility: keyboard navigation) ───────── */
+:focus-visible {
+  outline: 2px solid #0A84FF;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
