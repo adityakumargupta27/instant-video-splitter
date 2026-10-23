@@ -180,13 +180,26 @@ export default function ConfigForm({
           </div>
 
           {/* Caption Preview Box */}
-          <div className="p-3 rounded-[10px] bg-black/40 border border-white/[0.05] text-[12px] text-[rgba(235,235,245,0.7)] font-mono whitespace-pre-wrap leading-relaxed">
-            <span className="text-[#FF2D55] font-semibold font-sans text-[11px] block uppercase tracking-wider mb-1">
-              Sample Caption for Part 1:
+          <div className="p-3.5 rounded-[12px] bg-black/50 border border-white/[0.08] text-[12px] text-[rgba(235,235,245,0.8)] font-mono whitespace-pre-wrap leading-relaxed shadow-inner">
+            <span className="text-[#FF2D55] font-semibold font-sans text-[11px] block uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Preview (Sample for Part 1):</span>
+              <span className="text-[10px] text-[rgba(235,235,245,0.4)] lowercase font-mono">
+                {customCaption.trim() || customHashtags.trim() ? 'Customized' : 'Default format'}
+              </span>
             </span>
-            {previewTitle1}{'\n\n'}
-            {customCaption.trim() ? customCaption.trim() + '\n\n' : ''}
-            {customHashtags.trim() ? customHashtags.trim() + ' ' : ''}#part1
+            {customCaption.trim() || customHashtags.trim() ? (
+              <>
+                {previewTitle1}{'\n\n'}
+                {customCaption.trim() ? customCaption.trim() + '\n\n' : ''}
+                {customHashtags.trim() ? customHashtags.trim() + ' ' : ''}#part1
+              </>
+            ) : (
+              <>
+                {previewTitle1}{'\n\n'}
+                Split in original 100% lossless quality with Instant Video Splitter 🎬{'\n'}
+                #reels #part1 #instagram #video
+              </>
+            )}
           </div>
         </div>
 

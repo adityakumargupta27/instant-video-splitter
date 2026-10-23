@@ -56,8 +56,8 @@ export default function Home() {
   const [videoInfo, setVideoInfo]         = useState<VideoInfo | null>(null);
   const [templateTitle, setTemplateTitle] = useState('');
   const [templateFile, setTemplateFile]   = useState<File | null>(null);
-  const [customCaption, setCustomCaption] = useState('Watch till the end! Follow for more updates.');
-  const [customHashtags, setCustomHashtags] = useState('#reels #viral #trending #video');
+  const [customCaption, setCustomCaption] = useState('');
+  const [customHashtags, setCustomHashtags] = useState('');
   const [splitInterval, setSplitInterval] = useState(60); // default 60s (ideal for Instagram Reels)
   const [parts, setParts]                 = useState<SplitPart[]>([]);
   const [processing, setProcessing]       = useState<ProcessingState>({
@@ -125,16 +125,20 @@ export default function Home() {
           ? `Part_${partNumber}_${safeTitle}.${ext}` 
           : `Part_${partNumber}.${ext}`;
 
-        // Construct customized caption
-        const bodyText = customCaption.trim() ? customCaption.trim() : '';
-        let tags = customHashtags.trim() ? customHashtags.trim() : '#reels #trending #video';
-        if (!tags.toLowerCase().includes(`#part${partNumber}`)) {
-          tags = `${tags} #part${partNumber}`;
+        // Construct caption: if user didn't specify custom caption or hashtags, use the exact default requested
+        let caption = '';
+        if (customCaption.trim() || customHashtags.trim()) {
+          const bodyText = customCaption.trim();
+          let tags = customHashtags.trim() ? customHashtags.trim() : `#reels #part${partNumber} #instagram #video`;
+          if (!tags.toLowerCase().includes(`#part${partNumber}`)) {
+            tags = `${tags} #part${partNumber}`;
+          }
+          caption = bodyText 
+            ? `${partTitle}\n\n${bodyText}\n\n${tags}`
+            : `${partTitle}\n\n${tags}`;
+        } else {
+          caption = `${partTitle}\n\nSplit in original 100% lossless quality with Instant Video Splitter 🎬 \n#reels #part${partNumber} #instagram #video`;
         }
-
-        const caption = bodyText 
-          ? `${partTitle}\n\n${bodyText}\n\n${tags}`
-          : `${partTitle}\n\n${tags}`;
 
         const startTime  = i * splitInterval;
         const duration   = Math.min(splitInterval, videoInfo.duration - startTime);
