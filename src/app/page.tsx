@@ -21,6 +21,8 @@ export interface VideoInfo {
 
 export interface SplitPart {
   name: string;
+  title: string;
+  caption: string;
   blob: Blob;
   size: number;
   index: number;
@@ -51,11 +53,12 @@ function getMimeType(ext: string): string {
 
 /* ─── Page ──────────────────────────────────────────────────────── */
 export default function Home() {
-  const [videoInfo, setVideoInfo]     = useState<VideoInfo | null>(null);
-  const [baseName, setBaseName]       = useState('');
-  const [splitInterval, setSplitInterval] = useState(120); // seconds
-  const [parts, setParts]             = useState<SplitPart[]>([]);
-  const [processing, setProcessing]   = useState<ProcessingState>({
+  const [videoInfo, setVideoInfo]         = useState<VideoInfo | null>(null);
+  const [templateTitle, setTemplateTitle] = useState('');
+  const [templateFile, setTemplateFile]   = useState<File | null>(null);
+  const [splitInterval, setSplitInterval] = useState(60); // default 60s (ideal for Instagram Reels)
+  const [parts, setParts]                 = useState<SplitPart[]>([]);
+  const [processing, setProcessing]       = useState<ProcessingState>({
     status: 'idle', currentPart: 0, totalParts: 0, message: '', progress: 0,
   });
 
@@ -65,8 +68,6 @@ export default function Home() {
   /* ── Video loaded callback ─────────────────────────────────────── */
   const handleVideoLoaded = useCallback((info: VideoInfo) => {
     setVideoInfo(info);
-    const nameWithoutExt = info.file.name.replace(/\.[^/.]+$/, '');
-    setBaseName(nameWithoutExt);
     setParts([]);
     setProcessing({ status: 'idle', currentPart: 0, totalParts: 0, message: '', progress: 0 });
   }, []);
@@ -87,7 +88,6 @@ export default function Home() {
   /* ── Main split handler ────────────────────────────────────────── */
   const handleSplit = async () => {
     if (!videoInfo) return;
-    if (!baseName.trim()) { toast.error('Enter a base file name first.'); return; }
     if (splitInterval <= 0) { toast.error('Split interval must be > 0.'); return; }
 
     abortRef.current = false;
@@ -95,6 +95,9 @@ export default function Home() {
 
     const ext        = (videoInfo.file.name.split('.').pop() ?? 'mp4').toLowerCase();
     const totalParts = Math.ceil(videoInfo.duration / splitInterval);
+    const hasCustomTitle = templateTitle.trim().length > 0;
+    const cleanTitle = templateTitle.trim();
+    const safeTitle  = cleanTitle.replace(/[^a-zA-Z0-9_-]/g, '_');
 
     try {
       /* 1. Load engine */
@@ -107,24 +110,35 @@ export default function Home() {
 
       const newParts: SplitPart[] = [];
 
-      /* 3. Export each part with stream-copy (lossless, -c copy) */
+      /* 3. Export each part with stream-copy (100% Lossless, exact aspect ratio preserved) */
       for (let i = 0; i < totalParts; i++) {
         if (abortRef.current) break;
 
-        const padded     = String(i + 1).padStart(2, '0');
-        const outputName = `${baseName.trim()}_Part_${padded}.${ext}`;
+        const partNumber = i + 1;
+        const partTitle  = hasCustomTitle 
+          ? `Part ${partNumber} - ${cleanTitle}` 
+          : `Part ${partNumber}`;
+
+        const outputName = hasCustomTitle 
+          ? `Part_${partNumber}_${safeTitle}.${ext}` 
+          : `Part_${partNumber}.${ext}`;
+
+        const caption = hasCustomTitle 
+          ? `${partTitle}\n\nSplit in original 100% lossless quality with Instant Video Splitter 🎬\n#reels #part${partNumber} #instagram #video`
+          : `Part ${partNumber}\n\nSplit in original 100% lossless quality with Instant Video Splitter 🎬\n#reels #part${partNumber} #instagram #video`;
+
         const startTime  = i * splitInterval;
         const duration   = Math.min(splitInterval, videoInfo.duration - startTime);
 
         setProcessing({
           status: 'processing',
-          currentPart: i + 1,
+          currentPart: partNumber,
           totalParts,
-          message: `Exporting Part ${i + 1} of ${totalParts}…`,
+          message: `Exporting ${partTitle} (${partNumber}/${totalParts})…`,
           progress: Math.round(3 + (i / totalParts) * 94),
         });
 
-        // HIG Quality Constraint: -c copy = lossless stream copy, no re-encode
+        // Exact original stream copy — preserving resolution, aspect ratio & bitrate!
         await ffmpeg.exec([
           '-ss',   String(startTime),
           '-i',    `input.${ext}`,
@@ -136,10 +150,17 @@ export default function Home() {
         ]);
 
         const data  = await ffmpeg.readFile(outputName);
-        // Cast via unknown to satisfy strict ArrayBuffer vs SharedArrayBuffer TS constraint
         const blob  = new Blob([data as unknown as ArrayBuffer], { type: getMimeType(ext) });
         const url   = URL.createObjectURL(blob);
-        const part: SplitPart = { name: outputName, blob, size: blob.size, index: i + 1, url };
+        const part: SplitPart = { 
+          name: outputName, 
+          title: partTitle,
+          caption,
+          blob, 
+          size: blob.size, 
+          index: partNumber, 
+          url 
+        };
 
         newParts.push(part);
         setParts([...newParts]);
@@ -149,7 +170,7 @@ export default function Home() {
       await ffmpeg.deleteFile(`input.${ext}`);
 
       if (!abortRef.current) {
-        setProcessing({ status: 'done', currentPart: totalParts, totalParts, message: `${totalParts} part${totalParts !== 1 ? 's' : ''} ready to download`, progress: 100 });
+        setProcessing({ status: 'done', currentPart: totalParts, totalParts, message: `${totalParts} part${totalParts !== 1 ? 's' : ''} ready to download & post!`, progress: 100 });
         toast.success(`Split into ${totalParts} parts successfully!`);
       }
     } catch (err: unknown) {
@@ -170,7 +191,11 @@ export default function Home() {
       const content = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(content);
       const a   = document.createElement('a');
-      a.href = url; a.download = `${baseName.trim()}_all_parts.zip`; a.click();
+      a.href = url; 
+      a.download = templateTitle.trim() 
+        ? `${templateTitle.trim().replace(/[^a-zA-Z0-9_-]/g, '_')}_all_parts.zip`
+        : 'split_video_all_parts.zip'; 
+      a.click();
       URL.revokeObjectURL(url);
       toast.success('ZIP downloaded!', { id: tid });
     } catch { toast.error('Failed to create ZIP.', { id: tid }); }
@@ -181,8 +206,9 @@ export default function Home() {
     abortRef.current = true;
     parts.forEach(p => URL.revokeObjectURL(p.url));
     setVideoInfo(null);
-    setBaseName('');
-    setSplitInterval(120);
+    setTemplateTitle('');
+    setTemplateFile(null);
+    setSplitInterval(60);
     setParts([]);
     setProcessing({ status: 'idle', currentPart: 0, totalParts: 0, message: '', progress: 0 });
   };
@@ -273,8 +299,10 @@ export default function Home() {
             {showConfig && (
               <div className="animate-scale-in">
                 <ConfigForm
-                  baseName={baseName}
-                  setBaseName={setBaseName}
+                  templateTitle={templateTitle}
+                  setTemplateTitle={setTemplateTitle}
+                  templateFile={templateFile}
+                  setTemplateFile={setTemplateFile}
                   splitInterval={splitInterval}
                   setSplitInterval={setSplitInterval}
                   videoDuration={videoInfo.duration}
@@ -293,7 +321,7 @@ export default function Home() {
               <div className="animate-fade-up">
                 <OutputPanel
                   parts={parts}
-                  baseName={baseName}
+                  templateTitle={templateTitle}
                   onDownloadAll={handleDownloadAll}
                   onReset={handleReset}
                 />
