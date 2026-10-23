@@ -8,6 +8,10 @@ interface ConfigFormProps {
   setTemplateTitle: (v: string) => void;
   templateFile: File | null;
   setTemplateFile: (f: File | null) => void;
+  customCaption: string;
+  setCustomCaption: (v: string) => void;
+  customHashtags: string;
+  setCustomHashtags: (v: string) => void;
   splitInterval: number; // seconds
   setSplitInterval: (v: number) => void;
   videoDuration: number;
@@ -38,6 +42,8 @@ function fmtDur(sec: number) {
 export default function ConfigForm({
   templateTitle, setTemplateTitle,
   templateFile, setTemplateFile,
+  customCaption, setCustomCaption,
+  customHashtags, setCustomHashtags,
   splitInterval, setSplitInterval,
   videoDuration, totalParts,
   onSplit, disabled,
@@ -132,7 +138,59 @@ export default function ConfigForm({
           </div>
         </div>
 
-        {/* ── 2. Attach Template Graphic / Overlay (Optional) ────── */}
+        {/* ── 2. Custom Instagram Caption & Hashtags ───────────── */}
+        <div className="space-y-3 p-4 rounded-[16px] bg-white/[0.02] border border-white/[0.08]">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 text-[14px] font-semibold text-[rgba(235,235,245,0.9)]">
+              <FileText className="w-4 h-4 text-[#FF2D55]" />
+              Instagram Caption & Hashtags (Applied to All Parts)
+            </label>
+            <span className="text-[12px] text-[rgba(235,235,245,0.4)]">Customizable</span>
+          </div>
+
+          {/* Caption text */}
+          <div className="space-y-1">
+            <label className="text-[12px] text-[rgba(235,235,245,0.5)]">Caption Description</label>
+            <textarea
+              rows={2}
+              value={customCaption}
+              onChange={e => setCustomCaption(e.target.value)}
+              placeholder="e.g. Watch till the end! Let me know your thoughts in the comments 👇"
+              disabled={disabled}
+              className={[
+                'w-full bg-[#2C2C2E]/80 border border-white/[0.12] rounded-[10px]',
+                'px-3.5 py-2 text-[14px] text-white placeholder-[rgba(235,235,245,0.3)]',
+                'focus:outline-none focus:ring-2 focus:ring-[#0A84FF]/70 focus:border-transparent',
+                'disabled:opacity-40 transition-all resize-none tracking-[-0.004em]',
+              ].join(' ')}
+            />
+          </div>
+
+          {/* Hashtags */}
+          <div className="space-y-1">
+            <label className="text-[12px] text-[rgba(235,235,245,0.5)]">Hashtags</label>
+            <input
+              type="text"
+              value={customHashtags}
+              onChange={e => setCustomHashtags(e.target.value)}
+              placeholder="e.g. #reels #viral #podcast #trending"
+              disabled={disabled}
+              className={inputCls}
+            />
+          </div>
+
+          {/* Caption Preview Box */}
+          <div className="p-3 rounded-[10px] bg-black/40 border border-white/[0.05] text-[12px] text-[rgba(235,235,245,0.7)] font-mono whitespace-pre-wrap leading-relaxed">
+            <span className="text-[#FF2D55] font-semibold font-sans text-[11px] block uppercase tracking-wider mb-1">
+              Sample Caption for Part 1:
+            </span>
+            {previewTitle1}{'\n\n'}
+            {customCaption.trim() ? customCaption.trim() + '\n\n' : ''}
+            {customHashtags.trim() ? customHashtags.trim() + ' ' : ''}#part1
+          </div>
+        </div>
+
+        {/* ── 3. Attach Template Graphic / Overlay (Optional) ────── */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 text-[14px] font-semibold text-[rgba(235,235,245,0.9)]">

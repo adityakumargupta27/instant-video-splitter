@@ -56,6 +56,8 @@ export default function Home() {
   const [videoInfo, setVideoInfo]         = useState<VideoInfo | null>(null);
   const [templateTitle, setTemplateTitle] = useState('');
   const [templateFile, setTemplateFile]   = useState<File | null>(null);
+  const [customCaption, setCustomCaption] = useState('Watch till the end! Follow for more updates.');
+  const [customHashtags, setCustomHashtags] = useState('#reels #viral #trending #video');
   const [splitInterval, setSplitInterval] = useState(60); // default 60s (ideal for Instagram Reels)
   const [parts, setParts]                 = useState<SplitPart[]>([]);
   const [processing, setProcessing]       = useState<ProcessingState>({
@@ -123,9 +125,16 @@ export default function Home() {
           ? `Part_${partNumber}_${safeTitle}.${ext}` 
           : `Part_${partNumber}.${ext}`;
 
-        const caption = hasCustomTitle 
-          ? `${partTitle}\n\nSplit in original 100% lossless quality with Instant Video Splitter 🎬\n#reels #part${partNumber} #instagram #video`
-          : `Part ${partNumber}\n\nSplit in original 100% lossless quality with Instant Video Splitter 🎬\n#reels #part${partNumber} #instagram #video`;
+        // Construct customized caption
+        const bodyText = customCaption.trim() ? customCaption.trim() : '';
+        let tags = customHashtags.trim() ? customHashtags.trim() : '#reels #trending #video';
+        if (!tags.toLowerCase().includes(`#part${partNumber}`)) {
+          tags = `${tags} #part${partNumber}`;
+        }
+
+        const caption = bodyText 
+          ? `${partTitle}\n\n${bodyText}\n\n${tags}`
+          : `${partTitle}\n\n${tags}`;
 
         const startTime  = i * splitInterval;
         const duration   = Math.min(splitInterval, videoInfo.duration - startTime);
@@ -303,6 +312,10 @@ export default function Home() {
                   setTemplateTitle={setTemplateTitle}
                   templateFile={templateFile}
                   setTemplateFile={setTemplateFile}
+                  customCaption={customCaption}
+                  setCustomCaption={setCustomCaption}
+                  customHashtags={customHashtags}
+                  setCustomHashtags={setCustomHashtags}
                   splitInterval={splitInterval}
                   setSplitInterval={setSplitInterval}
                   videoDuration={videoInfo.duration}
