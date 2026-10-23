@@ -64,16 +64,16 @@ export default function OutputPanel({ parts, templateTitle, onDownloadAll, onRes
       }
     }
 
-    // 3. Fallback for Desktop: Auto-download video + copy caption + open Instagram Create page
+    // 3. Fallback for Desktop: Auto-download video + copy caption + open Instagram
     downloadPart(part);
     toast.success(
-      `Caption copied! Downloaded "${part.name}". Opening Instagram...`,
-      { duration: 5500 }
+      `Caption copied! Downloaded "${part.name}". Opening Instagram — click '+' Create to post!`,
+      { duration: 6000 }
     );
 
-    // Open Instagram post creation
+    // Open Instagram home (where the '+' Create button is located in the sidebar)
     setTimeout(() => {
-      window.open('https://www.instagram.com/create/select/', '_blank');
+      window.open('https://www.instagram.com/', '_blank');
     }, 600);
   };
 
@@ -127,7 +127,7 @@ export default function OutputPanel({ parts, templateTitle, onDownloadAll, onRes
           </p>
         </div>
         <a
-          href="https://www.instagram.com/create/select/"
+          href="https://www.instagram.com/"
           target="_blank"
           rel="noopener noreferrer"
           className="text-[12px] font-medium text-[#F77737] hover:underline flex items-center gap-1 shrink-0"
