@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, Archive, RotateCcw, FileVideo, Instagram, Copy, Check, ExternalLink, ChevronDown, ChevronUp, Edit3 } from 'lucide-react';
+import { Download, Archive, RotateCcw, FileVideo, Instagram, Copy, Check, ExternalLink, ChevronDown, ChevronUp, Edit3, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SplitPart } from '../page';
 
@@ -10,6 +10,7 @@ interface OutputPanelProps {
   templateTitle: string;
   onDownloadAll: () => void;
   onReset: () => void;
+  onOpenBatchSchedule: () => void;
 }
 
 function fmtSize(bytes: number) {
@@ -18,7 +19,7 @@ function fmtSize(bytes: number) {
   return `${(bytes / 1024).toFixed(0)} KB`;
 }
 
-export default function OutputPanel({ parts, templateTitle, onDownloadAll, onReset }: OutputPanelProps) {
+export default function OutputPanel({ parts, templateTitle, onDownloadAll, onReset, onOpenBatchSchedule }: OutputPanelProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [customCaptions, setCustomCaptions] = useState<Record<number, string>>({});
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -128,6 +129,18 @@ export default function OutputPanel({ parts, templateTitle, onDownloadAll, onRes
           >
             <Archive className="w-3.5 h-3.5" />
             Download All (.zip)
+          </button>
+
+          {/* 1-Click Batch Schedule All Button */}
+          <button
+            onClick={onOpenBatchSchedule}
+            className="flex items-center gap-1.5 text-[13px] font-semibold text-white
+              bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:brightness-110
+              shadow-[0_0_20px_rgba(253,29,29,0.35)] px-4 py-2 rounded-[10px]
+              transition-all duration-150 min-h-[36px] active:scale-95"
+          >
+            <Calendar className="w-4 h-4 text-white" />
+            Batch Schedule ({parts.length} Reels)
           </button>
         </div>
       </div>

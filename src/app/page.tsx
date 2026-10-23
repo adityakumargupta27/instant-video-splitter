@@ -10,6 +10,8 @@ import DropZone from './components/DropZone';
 import ConfigForm from './components/ConfigForm';
 import ProgressPanel from './components/ProgressPanel';
 import OutputPanel from './components/OutputPanel';
+import StepNavigator from './components/StepNavigator';
+import BatchScheduleModal from './components/BatchScheduleModal';
 
 /* ─── Shared types ──────────────────────────────────────────────── */
 export interface VideoInfo {
@@ -60,6 +62,7 @@ export default function Home() {
   const [customHashtags, setCustomHashtags] = useState('');
   const [splitInterval, setSplitInterval] = useState(60); // default 60s (ideal for Instagram Reels)
   const [parts, setParts]                 = useState<SplitPart[]>([]);
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [processing, setProcessing]       = useState<ProcessingState>({
     status: 'idle', currentPart: 0, totalParts: 0, message: '', progress: 0,
   });
@@ -230,6 +233,7 @@ export default function Home() {
   const totalParts   = videoInfo ? Math.ceil(videoInfo.duration / splitInterval) : 0;
   const showConfig   = !!videoInfo && (processing.status === 'idle' || processing.status === 'error');
   const showProgress = !!videoInfo && processing.status !== 'idle';
+  const currentStep: 1 | 2 | 3 = !videoInfo ? 1 : parts.length > 0 ? 3 : 2;
 
   return (
     <main className="min-h-screen bg-cosmic text-white relative overflow-hidden selection:bg-[#0A84FF]/30">
@@ -276,9 +280,12 @@ export default function Home() {
       {/* ── Main Content Container ─────────────────────────────────── */}
       <div className="max-w-3xl mx-auto px-5 pt-8 pb-24 space-y-6 relative z-10">
 
+        {/* ── Apple HIG Step Navigator ── */}
+        <StepNavigator currentStep={currentStep} />
+
         {/* Hero — only shown before file is loaded */}
         {!videoInfo && (
-          <div className="text-center space-y-4 pt-6 pb-4 animate-fade-up">
+          <div className="text-center space-y-4 pt-2 pb-4 animate-fade-up">
             {/* Glowing pill badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0A84FF]/10 border border-[#0A84FF]/30 text-[#0A84FF] text-[12px] font-medium tracking-wide shadow-[0_0_20px_rgba(10,132,255,0.2)]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#0A84FF] animate-pulse" />
@@ -341,12 +348,21 @@ export default function Home() {
                   templateTitle={templateTitle}
                   onDownloadAll={handleDownloadAll}
                   onReset={handleReset}
+                  onOpenBatchSchedule={() => setIsBatchModalOpen(true)}
                 />
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* ── Batch Schedule Modal ─────────────────────────────────── */}
+      <BatchScheduleModal
+        isOpen={isBatchModalOpen}
+        onClose={() => setIsBatchModalOpen(false)}
+        parts={parts}
+        templateTitle={templateTitle}
+      />
 
       {/* ── Footer ─────────────────────────────────────────────── */}
       <footer className="border-t border-white/[0.06] py-5">
