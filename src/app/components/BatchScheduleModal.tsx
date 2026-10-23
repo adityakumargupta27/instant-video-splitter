@@ -31,10 +31,14 @@ export default function BatchScheduleModal({ isOpen, onClose, parts, templateTit
   const [activeStartHour, setActiveStartHour] = useState(9); // 9 AM
   const [activeEndHour, setActiveEndHour] = useState(22);    // 10 PM
 
-  // API credentials (saved in localStorage)
-  const [instagramAccountId, setInstagramAccountId] = useState('');
-  const [metaAccessToken, setMetaAccessToken] = useState('');
-  const [storageBucketUrl, setStorageBucketUrl] = useState('');
+  // API credentials (defaults from env or localStorage)
+  const defaultIgId = process.env.NEXT_PUBLIC_DEFAULT_IG_ACCOUNT_ID || '';
+  const defaultToken = process.env.NEXT_PUBLIC_DEFAULT_META_ACCESS_TOKEN || '';
+  const defaultStorage = process.env.NEXT_PUBLIC_DEFAULT_STORAGE_URL || '';
+
+  const [instagramAccountId, setInstagramAccountId] = useState(defaultIgId);
+  const [metaAccessToken, setMetaAccessToken] = useState(defaultToken);
+  const [storageBucketUrl, setStorageBucketUrl] = useState(defaultStorage);
 
   // Scheduling progress state
   const [isScheduling, setIsScheduling] = useState(false);
@@ -51,12 +55,17 @@ export default function BatchScheduleModal({ isOpen, onClose, parts, templateTit
       const savedToken = localStorage.getItem('ivs_meta_access_token');
       const savedStorage = localStorage.getItem('ivs_storage_bucket_url');
       if (savedIgId) setInstagramAccountId(savedIgId);
+      else if (defaultIgId) setInstagramAccountId(defaultIgId);
+
       if (savedToken) setMetaAccessToken(savedToken);
+      else if (defaultToken) setMetaAccessToken(defaultToken);
+
       if (savedStorage) setStorageBucketUrl(savedStorage);
+      else if (defaultStorage) setStorageBucketUrl(defaultStorage);
     } catch {
       // Ignore localStorage errors
     }
-  }, []);
+  }, [defaultIgId, defaultToken, defaultStorage]);
 
   const saveSettings = () => {
     try {
@@ -204,8 +213,8 @@ export default function BatchScheduleModal({ isOpen, onClose, parts, templateTit
         </div>
 
         {/* ── Segmented Control Tabs (Apple Style) ── */}
-        <div className="px-6 pt-3 pb-2 border-b border-white/[0.06]">
-          <div className="flex p-1 bg-[#2C2C2E]/60 rounded-[12px] border border-white/[0.06]">
+        <div className="px-6 pt-3 pb-2 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
+          <div className="flex p-1 bg-[#2C2C2E]/60 rounded-[12px] border border-white/[0.06] flex-1 max-w-xs">
             <button
               onClick={() => setActiveTab('schedule')}
               className={`flex-1 py-1.5 rounded-[9px] text-[13px] font-medium transition-all ${
@@ -214,7 +223,7 @@ export default function BatchScheduleModal({ isOpen, onClose, parts, templateTit
                   : 'text-[rgba(235,235,245,0.5)] hover:text-white'
               }`}
             >
-              🗓️ Schedule Frequency
+              🗓️ Schedule
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -224,9 +233,21 @@ export default function BatchScheduleModal({ isOpen, onClose, parts, templateTit
                   : 'text-[rgba(235,235,245,0.5)] hover:text-white'
               }`}
             >
-              🔑 Meta API & Storage
+              🔑 API Settings
             </button>
           </div>
+
+          {/* Quick status pill */}
+          {instagramAccountId && metaAccessToken ? (
+            <div className="flex items-center gap-1.5 text-[11px] text-[#30D158] font-medium px-2.5 py-1 rounded-full bg-[#30D158]/10 border border-[#30D158]/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#30D158] animate-pulse" />
+              Connected (Auto-configured)
+            </div>
+          ) : (
+            <div className="text-[11px] text-[rgba(235,235,245,0.4)]">
+              No keys configured
+            </div>
+          )}
         </div>
 
         {/* ── Body Content ── */}
